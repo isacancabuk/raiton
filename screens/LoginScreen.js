@@ -6,7 +6,7 @@ import Input from "../components/Input";
 import Title from "../components/Title";
 import ButtonCostum from "../components/ButtonCostum";
 
-export default function LoginScreen({ onLogin, onSignUp }) {
+export default function LoginScreen({ onLogin, onSwitchToSignUp }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -19,7 +19,7 @@ export default function LoginScreen({ onLogin, onSignUp }) {
   const handleLogin = () => {
     if (email === "admin" && password === "123") onLogin();
   };
-  const handleSignUp = () => onSignUp("signup");
+  const handleSignUp = () => onSwitchToSignUp();
 
   return (
     <View style={styles.container}>

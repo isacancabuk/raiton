@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { StyleSheet } from "react-native";
 
 import LoginScreen from "./screens/LoginScreen";
 import MainScreen from "./screens/MainScreen";
@@ -9,21 +8,34 @@ import SignUpScreen from "./screens/SignUpScreen";
 export default function App() {
   const [authScreen, setAuthScreen] = useState("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState(null);
 
-  const handleLogin = () => {
+  const switchAuthScreenHandler = (screenName) => {
+    setAuthScreen(screenName);
+  };
+
+  const loginHandler = () => {
     setIsLoggedIn(true);
   };
-  const handleSignUp = (statue) => {
-    console.log(authScreen);
-    setAuthScreen(statue);
-  };
 
-  let screen = <LoginScreen onLogin={handleLogin} onSignUp={handleSignUp} />;
-  if (authScreen === "signup") screen = <SignUpScreen />;
-
+  let screen;
   if (isLoggedIn) screen = <MainScreen />;
+  else {
+    if (authScreen === "login") {
+      screen = (
+        <LoginScreen
+          onLogin={loginHandler}
+          onSwitchToSignUp={() => switchAuthScreenHandler("signup")}
+        />
+      );
+    } else {
+      screen = (
+        <SignUpScreen
+          onSwitchToLogin={() => switchAuthScreenHandler("login")}
+        />
+      );
+    }
+  }
 
   return <>{screen}</>;
 }
-
-const styles = StyleSheet.create({});
