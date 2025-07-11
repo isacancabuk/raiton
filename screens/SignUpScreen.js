@@ -3,16 +3,24 @@ import { useState } from "react";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 
-import { StyleSheet, View, Image, Pressable, Text } from "react-native";
+import { StyleSheet, View, Image, Pressable, Text, Alert } from "react-native";
 import Title from "../components/Title";
 import Input from "../components/Input";
 import ButtonCostum from "../components/ButtonCostum";
 
 export default function SignUpScreen({ onSwitchToLogin }) {
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [carBrand, setCarBrand] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignUp = async () => {
+    if (!name || !surname || !carBrand || !email || !password) {
+      Alert.alert("Error", "All fields are required.");
+      return;
+    }
+
     try {
       // 1. Adım: Firebase Authentication ile kullanıcı oluşturma
       const userCredential = await auth().createUserWithEmailAndPassword(
@@ -24,28 +32,34 @@ export default function SignUpScreen({ onSwitchToLogin }) {
 
       // 2. Adım: Firestore'a kullanıcı rolünü kaydetme
       await firestore().collection("users").doc(user.uid).set({
+        name: name,
+        surname: surname,
+        carBrand: carBrand,
         role: "user",
         email: email,
         createdAt: firestore.FieldValue.serverTimestamp(),
       });
-      console.log("Kullanıcı rolü Firestore'a eklendi!");
+      console.log("User data added to Firestore!");
 
       Alert.alert(
-        "Kayıt Başarılı!",
-        "Hesabınız başarıyla oluşturuldu. Giriş yapabilirsiniz.",
-        [{ text: "Tamam", onPress: onSwitchToLogin }]
+        "Sign Up Successful!",
+        "Your account has been created. You can now log in.",
+        [{ text: "OK", onPress: onSwitchToLogin }]
       );
     } catch (error) {
-      let errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
+      let errorMessage = "An error occurred. Please try again.";
+
       if (error.code === "auth/email-already-in-use") {
-        errorMessage = "Bu e-posta adresi zaten kullanılıyor!";
+        errorMessage = "That email address is already in use!";
       } else if (error.code === "auth/invalid-email") {
-        errorMessage = "Geçersiz bir e-posta adresi girdiniz!";
+        errorMessage = "That email address is invalid!";
       } else if (error.code === "auth/weak-password") {
-        errorMessage = "Şifre çok zayıf. En az 6 karakter olmalı.";
+        errorMessage =
+          "The password is too weak. It must be at least 6 characters long.";
       }
-      console.error(error);
-      Alert.alert("Kayıt Başarısız", errorMessage);
+
+      console.error("Sign up error:", error);
+      Alert.alert("Sign Up Failed", errorMessage);
     }
   };
   return (
@@ -59,9 +73,15 @@ export default function SignUpScreen({ onSwitchToLogin }) {
       </View>
       <View style={styles.inputContainer}>
         <View>
-          <Input>Your Name</Input>
-          <Input>Your Surname</Input>
-          <Input>Your Car Brand</Input>
+          <Input onChangeInput={setName} inputValue={name}>
+            Your Name
+          </Input>
+          <Input onChangeInput={setSurname} inputValue={surname}>
+            Your Surname
+          </Input>
+          <Input onChangeInput={setCarBrand} inputValue={carBrand}>
+            Your Car Brand
+          </Input>
           <Input onChangeInput={setEmail} inputValue={email}>
             E-mail
           </Input>
