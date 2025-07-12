@@ -15,7 +15,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ration.evchargeapp",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCGPUxnEQyK3hCrkTqaIsNqeVHsr1vqEc8"
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +29,12 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.ration.evchargeapp",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCGPUxnEQyK3hCrkTqaIsNqeVHsr1vqEc8"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
