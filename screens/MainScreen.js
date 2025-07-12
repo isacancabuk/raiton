@@ -61,6 +61,7 @@ export default function MainScreen() {
         initialRegion={initialRegion}
         showsUserLocation={true}
         showsMyLocationButton={true}
+        mapPadding={{ top: 0, right: 0, bottom: 90, left: 0 }}
       >
         {/* İstasyon işaretçileri (Marker) buraya gelecek (Faz 3) */}
       </MapView>
