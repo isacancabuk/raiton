@@ -62,6 +62,7 @@ export default function SignUpScreen({ onSwitchToLogin }) {
       Alert.alert("Sign Up Failed", errorMessage);
     }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>

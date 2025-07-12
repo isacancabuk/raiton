@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import auth from "@react-native-firebase/auth";
+
 import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 
 import Input from "../components/Input";
@@ -16,10 +18,33 @@ export default function LoginScreen({ onLogin, onSwitchToSignUp }) {
   const handleInputPassword = (enteredText) => {
     setPassword(enteredText);
   };
-  const handleLogin = () => {
-    if (email === "admin" && password === "123") onLogin();
-  };
+
   const handleSignUp = () => onSwitchToSignUp();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Email and password fields cannot be empty.");
+      return;
+    }
+
+    try {
+      await auth().signInWithEmailAndPassword(email, password);
+      console.log("Login successful!");
+    } catch (error) {
+      let errorMessage = "An error occurred. Please try again.";
+      if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        errorMessage = "Invalid email or password.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "That email address is invalid!";
+      }
+
+      console.error("Login error:", error);
+      Alert.alert("Login Failed", errorMessage);
+    }
+  };
 
   return (
     <View style={styles.container}>
