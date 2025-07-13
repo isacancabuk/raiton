@@ -12,6 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "extra": {
+      "directionsApiKey": "AIzaSyAtL6QZKGAnZor3ozMWVcNhfkkWv-E_E00"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.ration.evchargeapp",

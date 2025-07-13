@@ -1,98 +1,160 @@
 import { View, StyleSheet, Alert } from "react-native";
 import { useState, useEffect, useRef } from "react";
 
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapViewDirections from "react-native-maps-directions";
 import * as Location from "expo-location";
-
+import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
-import ButtonIcon from "../components/ButtonIcon";
+
+import StationDetailsCard from "../components/StationDetailsCard";
+
+// app.json'daki 'extra' alanından API anahtarını güvenli bir şekilde okumak için
+import Constants from "expo-constants";
+const DIRECTIONS_API_KEY = Constants.expoConfig?.extra?.directionsApiKey;
+
+const stationMarkerIcon = require("../assets/images/station_pin.png");
 
 export default function MainScreen() {
-  // Haritayı programatik olarak kontrol etmek için bir referans oluşturuyoruz
   const mapRef = useRef(null);
+  const [stations, setStations] = useState([]);
+  const [selectedStation, setSelectedStation] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [routeDestination, setRouteDestination] = useState(null);
 
-  // Haritanın başlangıçta odaklanacağı konumu belirliyoruz (İstanbul)
-  const initialRegion = {
-    latitude: 41.0082,
-    longitude: 28.9784,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  };
-
-  // Component ilk yüklendiğinde konum izni istemek ve konumu almak için useEffect kullanıyoruz
   useEffect(() => {
+    if (!DIRECTIONS_API_KEY) {
+      console.error(
+        "Directions API key is not set in app.json. Please add it under expo.extra.directionsApiKey"
+      );
+      Alert.alert("Configuration Error", "Directions API key is missing.");
+    }
+
     const getLocation = async () => {
-      // 1. Adım: Kullanıcıdan konum izni iste
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        Alert.alert(
-          "Permission denied",
-          "Location permission is needed to show your position on the map."
-        );
+        Alert.alert("Permission denied", "Location permission is needed.");
         return;
       }
-
-      // 2. Adım: Kullanıcının mevcut konumunu al
       let location = await Location.getCurrentPositionAsync({});
-
-      // 3. Adım: Haritayı kullanıcının konumuna odakla
-      const userLocation = {
+      const currentUserLocation = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.005, // Daha yakın bir zoom seviyesi
-        longitudeDelta: 0.005,
       };
+      setUserLocation(currentUserLocation);
 
-      // Haritayı yeni konuma animasyonla kaydır
       if (mapRef.current) {
-        mapRef.current.animateToRegion(userLocation, 1000); // 1000ms = 1 saniye
+        mapRef.current.animateToRegion(
+          { ...currentUserLocation, latitudeDelta: 0.05, longitudeDelta: 0.05 },
+          1000
+        );
       }
     };
 
+    const stationSubscriber = firestore()
+      .collection("stations")
+      .onSnapshot((querySnapshot) => {
+        const stationsData = [];
+        querySnapshot.forEach((documentSnapshot) => {
+          stationsData.push({
+            ...documentSnapshot.data(),
+            id: documentSnapshot.id,
+          });
+        });
+        setStations(stationsData);
+      });
+
     getLocation();
+    return () => stationSubscriber();
   }, []);
+
+  const handleMarkerPress = (station) => {
+    setSelectedStation(station);
+    setRouteDestination(null);
+  };
+
+  const handleCloseCard = () => {
+    setSelectedStation(null);
+  };
+
+  const handleDrawRoute = (station, socket) => {
+    setRouteDestination(station.location);
+    setSelectedStation(null);
+
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      firestore()
+        .collection("chargeHistory")
+        .add({
+          userId: currentUser.uid,
+          stationId: station.id,
+          stationName: station.name,
+          socketId: socket.id,
+          socketType: socket.type,
+          date: firestore.FieldValue.serverTimestamp(),
+        })
+        .then(() => {
+          console.log("Charge history added!");
+        })
+        .catch((error) => {
+          console.error("Error adding charge history: ", error);
+          Alert.alert("Error", "Could not save to your history.");
+        });
+    }
+  };
 
   return (
     <View style={styles.container}>
       <MapView
-        ref={mapRef} // Referansı MapView'e atıyoruz
+        ref={mapRef}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
-        initialRegion={initialRegion}
+        initialRegion={{
+          latitude: 37.0,
+          longitude: 35.32,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        }}
         showsUserLocation={true}
         showsMyLocationButton={true}
-        mapPadding={{ top: 0, right: 0, bottom: 90, left: 0 }}
+        onPress={handleCloseCard}
       >
-        {/* İstasyon işaretçileri (Marker) buraya gelecek (Faz 3) */}
+        {stations.map((station) => (
+          <Marker
+            key={station.id}
+            coordinate={{
+              latitude: station.location.latitude,
+              longitude: station.location.longitude,
+            }}
+            title={station.name}
+            description={station.address}
+            image={stationMarkerIcon}
+            onPress={() => handleMarkerPress(station)}
+          />
+        ))}
+
+        {userLocation && routeDestination && DIRECTIONS_API_KEY && (
+          <MapViewDirections
+            origin={userLocation}
+            destination={routeDestination}
+            apikey={DIRECTIONS_API_KEY}
+            strokeWidth={5}
+            strokeColor="hotpink"
+          />
+        )}
       </MapView>
 
-      <View style={styles.footer}>
-        <ButtonIcon name="save" text="History" />
-        <ButtonIcon name="map" text="Map" />
-        <ButtonIcon name="person" text="Profile" />
-      </View>
+      <StationDetailsCard
+        station={selectedStation}
+        visible={!!selectedStation}
+        onClose={handleCloseCard}
+        onDrawRoute={handleDrawRoute}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 90,
-    backgroundColor: "white",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-  },
+  container: { flex: 1 },
+  map: { flex: 1 },
 });
