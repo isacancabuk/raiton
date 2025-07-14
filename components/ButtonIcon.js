@@ -1,11 +1,12 @@
 import { Pressable, Text, StyleSheet } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Colors from "../constants/color";
 
 // onPress ve isActive propları eklendi
 export default function ButtonIcon({ name, text, onPress, isActive }) {
   // Aktif durumuna göre renk ve ikon stilini ayarla
-  const iconColor = isActive ? "#007AFF" : "#8A8A8E"; // Apple'ın sistem renkleri
-  const textColor = isActive ? "#007AFF" : "#8A8A8E";
+  const iconColor = isActive ? Colors.secondary500 : Colors.accent500;
+  const textColor = isActive ? Colors.secondary500 : Colors.accent500;
   const iconName = isActive ? name : `${name}-outline`;
 
   return (

@@ -7,8 +7,10 @@ import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import Input from "../components/Input";
 import Title from "../components/Title";
 import ButtonCostum from "../components/ButtonCostum";
+import Logo from "../assets/images/logosvg.svg";
+import Colors from "../constants/color.js";
 
-export default function LoginScreen({ onLogin, onSwitchToSignUp }) {
+export default function LoginScreen({ onSwitchToSignUp }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -49,10 +51,7 @@ export default function LoginScreen({ onLogin, onSwitchToSignUp }) {
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={styles.image}
-        />
+        <Logo width={200} height={200} stroke={Colors.primary500} />
         <Title />
       </View>
       <View style={styles.inputContainer}>
@@ -71,7 +70,6 @@ export default function LoginScreen({ onLogin, onSwitchToSignUp }) {
         <View style={styles.forgotContainer}>
           <Pressable>
             <Text style={styles.forgotText}>Forgot Your</Text>
-
             <Text style={styles.forgotText}>Password?</Text>
           </Pressable>
         </View>
@@ -88,14 +86,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-around",
+    backgroundColor: Colors.textBack500,
   },
   imageContainer: {
     alignItems: "center",
     marginTop: 100,
-  },
-  image: {
-    width: 250,
-    height: 250,
   },
   inputContainer: {
     flexDirection: "row",
@@ -108,10 +103,13 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   forgotText: {
-    fontSize: 14,
-    paddingBottom: 3,
+    color: Colors.accent700,
+    fontFamily: "Roboto-Light",
+    fontSize: 16,
+    paddingBottom: 6,
   },
   buttonContainer: {
-    margin: 16,
+    marginHorizontal: 36,
+    marginBottom: 10,
   },
 });

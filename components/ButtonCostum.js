@@ -1,13 +1,12 @@
 import { StyleSheet, Pressable, Text } from "react-native";
+import Colors from "../constants/color";
 
-// disabled prop'u eklendi
 export default function ButtonCostum({
   onPressed,
   children,
   disabled = false,
 }) {
   return (
-    // disabled durumuna göre stil ve onPress olayı ayarlandı
     <Pressable
       style={[styles.button, disabled && styles.buttonDisabled]}
       onPress={onPressed}
@@ -22,19 +21,20 @@ export default function ButtonCostum({
 
 const styles = StyleSheet.create({
   button: {
-    height: 44,
-    backgroundColor: "red",
-    borderRadius: 5,
+    height: 50,
+    backgroundColor: Colors.secondary500,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
   },
   buttonDisabled: {
-    backgroundColor: "#ccc", // Devre dışı rengi
+    backgroundColor: Colors.accent700,
   },
   buttonText: {
-    fontSize: 22,
-    color: "white", // Yazı rengi beyaz yapıldı
+    fontFamily: "Roboto-Bold",
+    fontSize: 26,
+    color: Colors.textBack500,
   },
   buttonTextDisabled: {
     color: "#999",

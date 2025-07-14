@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,26 +6,12 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
+
+import HistoryItem from "../components/HistoryItem";
+import Colors from "../constants/color";
+
 import firestore from "@react-native-firebase/firestore";
 import auth from "@react-native-firebase/auth";
-
-// Her bir geçmiş kaydını gösterecek olan component
-const HistoryItem = ({ item }) => {
-  // Firestore'dan gelen tarih objesini okunabilir bir formata çevir
-  const date = item.date
-    ? item.date.toDate().toLocaleString("tr-TR")
-    : "Tarih bilgisi yok";
-
-  return (
-    <View style={styles.itemContainer}>
-      <Text style={styles.stationName}>{item.stationName}</Text>
-      <Text style={styles.socketInfo}>
-        Socket: {item.socketType} (ID: {item.socketId})
-      </Text>
-      <Text style={styles.dateText}>{date}</Text>
-    </View>
-  );
-};
 
 export default function HistoryScreen() {
   const [loading, setLoading] = useState(true);
@@ -35,7 +21,6 @@ export default function HistoryScreen() {
     const currentUser = auth().currentUser;
     if (!currentUser) return;
 
-    // Sadece mevcut kullanıcıya ait geçmiş kayıtlarını dinle
     const subscriber = firestore()
       .collection("chargeHistory")
       .where("userId", "==", currentUser.uid)
@@ -48,7 +33,6 @@ export default function HistoryScreen() {
           });
         });
 
-        // Kayıtları en yeniden en eskiye doğru sırala
         historyData.sort(
           (a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0)
         );
@@ -57,7 +41,6 @@ export default function HistoryScreen() {
         setLoading(false);
       });
 
-    // Component kaldırıldığında dinleyiciyi kapat
     return () => subscriber();
   }, []);
 
@@ -89,19 +72,21 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.textBack500,
+    marginTop: 50,
   },
   title: {
+    fontFamily: "Roboto-Bold",
+    color: Colors.primary700,
     fontSize: 32,
-    fontWeight: "bold",
     margin: 20,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
+    color: Colors.primary500,
     textAlign: "center",
-    marginTop: 20,
+    marginTop: 50,
   },
   loader: {
     flex: 1,
@@ -110,28 +95,5 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingHorizontal: 20,
-  },
-  itemContainer: {
-    backgroundColor: "#f8f8f8",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
-  },
-  stationName: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  socketInfo: {
-    fontSize: 14,
-    color: "#555",
-    marginTop: 4,
-  },
-  dateText: {
-    fontSize: 12,
-    color: "#888",
-    marginTop: 8,
-    textAlign: "right",
   },
 });

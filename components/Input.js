@@ -1,4 +1,5 @@
 import { StyleSheet, TextInput } from "react-native";
+import Colors from "../constants/color";
 
 export default function Input({
   children,
@@ -22,11 +23,13 @@ export default function Input({
 
 const styles = StyleSheet.create({
   input: {
+    color: Colors.primary700,
     width: 250,
-    fontSize: 18,
+    fontSize: 20,
+    fontFamily: "Roboto-Regular",
     paddingVertical: 8,
-    marginBottom: 8,
-    borderColor: "black",
+    marginBottom: 14,
+    borderColor: Colors.primary500,
     borderBottomWidth: 1,
   },
 });
